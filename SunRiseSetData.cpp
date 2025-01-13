@@ -311,94 +311,150 @@ std::ostringstream SunRiseSetDatas::printResult()                      // Create
     if (m_TheEvalIndex.valid)
     {
         sprintf_s(msgTxt, sizeof(msgTxt), "          Date:         Sunrise     Sunset   Duration"); resultString << msgTxt << std::endl;
-        //                                 Actual    yyyy-mm-dd   hh:mm:ss   hh:mm:ss   hh:mm:ss
-        sprintf_s(msgTxt, sizeof(msgTxt), "Actual    %04d-%02d-%02d%5d:%02d:%02d%5d:%02d:%02d%5d:%02d:%02d",
-            m_SunRiseSetDatas[m_TheEvalIndex.index].getYear(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].getMonth(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].getDay(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::RISE).getHour(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::RISE).getMin(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::RISE).getSec(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::SET).getHour(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::SET).getMin(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::SET).getSec(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::DUR).getHour(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::DUR).getMin(),
-            m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::DUR).getSec()
-        );  resultString << msgTxt << std::endl;
-
-        if (m_PrevSim[SunRiseSetData::RISE].valid)
+        for (size_t theInx = 0; theInx < m_SunRiseSetDatas.size(); theInx++)
         {
-            sprintf_s(msgTxt, sizeof(msgTxt), "Previous  %04d-%02d-%02d%5d:%02d:%02d   --:--:--   --:--:--",
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].getYear(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].getMonth(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].getDay(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getHour(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getMin(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getSec()
-            ); resultString << msgTxt << std::endl;
-        }
-        if (m_PrevSim[SunRiseSetData::SET].valid)
-        {
-            sprintf_s(msgTxt, sizeof(msgTxt), "Previous  %04d-%02d-%02d   --:--:--%5d:%02d:%02d   --:--:--",
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].getYear(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].getMonth(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].getDay(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getHour(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getMin(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getSec()
-            ); resultString << msgTxt << std::endl;
-        }
-        if (m_PrevSim[SunRiseSetData::DUR].valid)
-        {
-            sprintf_s(msgTxt, sizeof(msgTxt), "Previous  %04d-%02d-%02d   --:--:--   --:--:--%5d:%02d:%02d",
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].getYear(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].getMonth(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].getDay(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getHour(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getMin(),
-                m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getSec()
-            ); resultString << msgTxt << std::endl;          
-        }
+            bool foundOne = false;
+            if (theInx < m_TheEvalIndex.index)
+            {
+                sprintf_s(msgTxt, sizeof(msgTxt), "Previous: ");
+            }
+            else if (theInx == m_TheEvalIndex.index)
+            {
+                sprintf_s(msgTxt, sizeof(msgTxt), "Actual:   ");
+            }
+            else
+            {
+                sprintf_s(msgTxt, sizeof(msgTxt), "Next:     ");
+            }
+            sprintf_s(msgTxt, sizeof(msgTxt), "%s%04d-%02d-%02d",
+                msgTxt,
+                m_SunRiseSetDatas[theInx].getYear(),
+                m_SunRiseSetDatas[theInx].getMonth(),
+                m_SunRiseSetDatas[theInx].getDay());
 
-        if (m_NextSim[SunRiseSetData::RISE].valid)
-        {
-            sprintf_s(msgTxt, sizeof(msgTxt), "Next      %04d-%02d-%02d%5d:%02d:%02d   --:--:--   --:--:--",
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].getYear(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].getMonth(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].getDay(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getHour(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getMin(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getSec()
-            ); resultString << msgTxt << std::endl;
+            for (SunRiseSetData::TimeCriteria criteria = SunRiseSetData::RISE; (true); )
+            {
+
+                size_t theRevInx = 0;
+                //                                 Actual    yyyy-mm-dd   hh:mm:ss   hh:mm:ss   hh:mm:ss
+                for (theRevInx = 0; theRevInx < m_RelevantIndices->size(); theRevInx++)
+                {
+                    if (theInx == m_RelevantIndices[criteria][theRevInx])
+                    {
+                        foundOne = true;
+                        sprintf_s(msgTxt, sizeof(msgTxt), "%s%5d:%02d:%02d",
+                            msgTxt,
+                            m_SunRiseSetDatas[theInx].whatCriteria(criteria).getHour(),
+                            m_SunRiseSetDatas[theInx].whatCriteria(criteria).getMin(),
+                            m_SunRiseSetDatas[theInx].whatCriteria(criteria).getSec());
+                        break;
+                    }
+                }
+                if (theRevInx >= m_RelevantIndices->size())
+                {
+                    sprintf_s(msgTxt, sizeof(msgTxt), "%s     :  :  ",
+                        msgTxt);
+                }
+
+                if (criteria == SunRiseSetData::RISE)
+                {
+                    criteria = SunRiseSetData::SET;
+                }
+                else if (criteria == SunRiseSetData::SET)
+                {
+                    criteria = SunRiseSetData::DUR;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (foundOne)
+            {
+                resultString << msgTxt << std::endl;
+            }
         }
-        if (m_NextSim[SunRiseSetData::SET].valid)
-        {
-            sprintf_s(msgTxt, sizeof(msgTxt), "Next      %04d-%02d-%02d   --:--:--%5d:%02d:%02d   --:--:--",
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].getYear(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].getMonth(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].getDay(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getHour(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getMin(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getSec()
-            ); resultString << msgTxt << std::endl;
-        }
-        if (m_NextSim[SunRiseSetData::DUR].valid)
-        {
-            sprintf_s(msgTxt, sizeof(msgTxt), "Next      %04d-%02d-%02d   --:--:--   --:--:--%5d:%02d:%02d",
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].getYear(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].getMonth(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].getDay(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getHour(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getMin(),
-                m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getSec()
-            ); resultString << msgTxt << std::endl;
-        }
+        ////                                 Actual    yyyy-mm-dd   hh:mm:ss   hh:mm:ss   hh:mm:ss
+        //sprintf_s(msgTxt, sizeof(msgTxt), "Actual    %04d-%02d-%02d%5d:%02d:%02d%5d:%02d:%02d%5d:%02d:%02d",
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].getYear(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].getMonth(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].getDay(),
 
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::SET).getHour(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::SET).getMin(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::SET).getSec(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::DUR).getHour(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::DUR).getMin(),
+        //    m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(SunRiseSetData::DUR).getSec()
+        //);  resultString << msgTxt << std::endl;
 
+        //if (m_PrevSim[SunRiseSetData::RISE].valid)
+        //{
+        //    sprintf_s(msgTxt, sizeof(msgTxt), "Previous  %04d-%02d-%02d%5d:%02d:%02d   --:--:--   --:--:--",
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].getYear(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].getMonth(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].getDay(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getHour(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getMin(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getSec()
+        //    ); resultString << msgTxt << std::endl;
+        //}
+        //if (m_PrevSim[SunRiseSetData::SET].valid)
+        //{
+        //    sprintf_s(msgTxt, sizeof(msgTxt), "Previous  %04d-%02d-%02d   --:--:--%5d:%02d:%02d   --:--:--",
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].getYear(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].getMonth(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].getDay(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getHour(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getMin(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getSec()
+        //    ); resultString << msgTxt << std::endl;
+        //}
+        //if (m_PrevSim[SunRiseSetData::DUR].valid)
+        //{
+        //    sprintf_s(msgTxt, sizeof(msgTxt), "Previous  %04d-%02d-%02d   --:--:--   --:--:--%5d:%02d:%02d",
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].getYear(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].getMonth(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].getDay(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getHour(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getMin(),
+        //        m_SunRiseSetDatas[m_PrevSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getSec()
+        //    ); resultString << msgTxt << std::endl;          
+        //}
 
-
-
+        //if (m_NextSim[SunRiseSetData::RISE].valid)
+        //{
+        //    sprintf_s(msgTxt, sizeof(msgTxt), "Next      %04d-%02d-%02d%5d:%02d:%02d   --:--:--   --:--:--",
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].getYear(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].getMonth(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].getDay(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getHour(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getMin(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::RISE].index].whatCriteria(SunRiseSetData::RISE).getSec()
+        //    ); resultString << msgTxt << std::endl;
+        //}
+        //if (m_NextSim[SunRiseSetData::SET].valid)
+        //{
+        //    sprintf_s(msgTxt, sizeof(msgTxt), "Next      %04d-%02d-%02d   --:--:--%5d:%02d:%02d   --:--:--",
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].getYear(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].getMonth(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].getDay(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getHour(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getMin(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::SET].index].whatCriteria(SunRiseSetData::SET).getSec()
+        //    ); resultString << msgTxt << std::endl;
+        //}
+        //if (m_NextSim[SunRiseSetData::DUR].valid)
+        //{
+        //    sprintf_s(msgTxt, sizeof(msgTxt), "Next      %04d-%02d-%02d   --:--:--   --:--:--%5d:%02d:%02d",
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].getYear(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].getMonth(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].getDay(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getHour(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getMin(),
+        //        m_SunRiseSetDatas[m_NextSim[SunRiseSetData::DUR].index].whatCriteria(SunRiseSetData::DUR).getSec()
+        //    ); resultString << msgTxt << std::endl;
+        //}
     }
     else
     {
@@ -408,3 +464,86 @@ std::ostringstream SunRiseSetDatas::printResult()                      // Create
     return resultString;
 
 }
+
+// Funktion, die die Vergleichslogik dynamisch auswählt
+std::function<bool(const SunRiseSetData&, const SunRiseSetData&)> getComparator(SunRiseSetData::TimeCriteria aType)
+{
+    switch (aType)
+    {
+    case SunRiseSetData::RISE:
+        return [](const SunRiseSetData& a, const SunRiseSetData& b)
+            {
+                return a.whatCriteria(SunRiseSetData::RISE).getDeltaRef() < b.whatCriteria(SunRiseSetData::RISE).getDeltaRef();
+            };
+    case SunRiseSetData::SET:
+        return [](const SunRiseSetData& a, const SunRiseSetData& b)
+            {
+                return a.whatCriteria(SunRiseSetData::SET).getDeltaRef() < b.whatCriteria(SunRiseSetData::SET).getDeltaRef();
+            };
+    default:
+        return [](const SunRiseSetData& a, const SunRiseSetData& b)
+            {
+                return a.whatCriteria(SunRiseSetData::DUR).getDeltaRef() < b.whatCriteria(SunRiseSetData::DUR).getDeltaRef();
+            };
+    }
+}
+
+size_t SunRiseSetDatas::CalcDelta2Reference()
+{
+    size_t sumIx = 0;
+    if (m_TheEvalIndex.valid)
+    {
+        for (SunRiseSetData::TimeCriteria criteria = SunRiseSetData::RISE; (true); )
+        {
+            auto comparatorFunction = getComparator(criteria);
+            m_SortIndices[criteria].clear();
+            m_RelevantIndices[criteria].clear();
+            for (size_t anEvalInx = 0; anEvalInx < m_SunRiseSetDatas.size(); anEvalInx++)
+            {
+                m_SunRiseSetDatas[anEvalInx].whatCriteriaNConst(criteria).calcDelta2Ref(m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(criteria).getMsAfterMidnight());
+                sumIx++;
+                m_SortIndices[criteria].push_back(anEvalInx);
+            }
+
+            std::sort(m_SortIndices[criteria].begin(), m_SortIndices[criteria].end(),
+                [&](size_t a, size_t b) { return comparatorFunction(m_SunRiseSetDatas[a], m_SunRiseSetDatas[b]); });
+
+            size_t srcIx = 1;
+            size_t noPrev = 0;
+            size_t noNext = 0;
+            m_RelevantIndices[criteria].push_back(m_TheEvalIndex.index);
+
+            while (((noPrev < (RELEVANTINDICES / 2)) || (noNext < (RELEVANTINDICES / 2))) && (srcIx < m_SortIndices[criteria].size()))
+            {
+                if ((m_SortIndices[criteria][srcIx] < m_TheEvalIndex.index) && (noPrev < (RELEVANTINDICES / 2)))
+                {
+                    m_RelevantIndices[criteria].push_back(m_SortIndices[criteria][srcIx]);
+                    noPrev++;
+                }
+                if ((m_SortIndices[criteria][srcIx] > m_TheEvalIndex.index) && (noNext < (RELEVANTINDICES / 2)))
+                {
+                    m_RelevantIndices[criteria].push_back(m_SortIndices[criteria][srcIx]);
+                    noNext++;
+                }
+                srcIx++;
+            }
+
+            if (criteria == SunRiseSetData::RISE)
+            {
+                criteria = SunRiseSetData::SET;
+            }
+            else if (criteria == SunRiseSetData::SET)
+            {
+                criteria = SunRiseSetData::DUR;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    return sumIx;
+}
+
+
+

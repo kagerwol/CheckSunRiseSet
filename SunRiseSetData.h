@@ -1,5 +1,7 @@
 #pragma once
 
+const size_t RELEVANTINDICES = 5;
+
 class SunRiseSetData
 {
 public:
@@ -9,6 +11,7 @@ public:
 		DUR = 2,
 		NOCRITERIA
 	} TimeCriteria;
+
 
 protected:
 	unsigned int m_Year;
@@ -31,7 +34,7 @@ public:
 			return m_Daylength;
 		}
 	}
-protected:
+public:
 	inline MsConversion& whatCriteriaNConst(TimeCriteria aType)
 	{
 		switch (aType)
@@ -85,6 +88,8 @@ public:
 	SunRiseSetData& operator=(const SunRiseSetData& other);
 
 	~SunRiseSetData();
+
+	
 };
 
 class SunRiseSetDatas
@@ -107,6 +112,9 @@ protected:
 	IndexValidPair m_NextTurn[SunRiseSetData::NOCRITERIA];
 	IndexValidPair m_PrevSim[SunRiseSetData::NOCRITERIA];
 	IndexValidPair m_NextSim[SunRiseSetData::NOCRITERIA];
+
+	std::vector<size_t> m_SortIndices[SunRiseSetData::NOCRITERIA];
+	std::vector<size_t> m_RelevantIndices[SunRiseSetData::NOCRITERIA];
 
 protected:
 
@@ -133,4 +141,5 @@ public:
 	std::ostringstream printResult();               // Create a Result as String
 
 	inline const size_t size() const { return m_SunRiseSetDatas.size(); };
+	size_t CalcDelta2Reference();
 };

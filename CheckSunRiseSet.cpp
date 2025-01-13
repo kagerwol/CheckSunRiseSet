@@ -128,6 +128,7 @@ int main(int argc, char* argv[], char* envp[])
                 if (sunRiseSetDatas.size() > 0)
                 {
                     sunRiseSetDatas.doAnalyzation();
+                    sunRiseSetDatas.CalcDelta2Reference();
                     std::cout << sunRiseSetDatas.printResult().str();
 
 					//std::cout << "Found Index " << theEvalIndex << " for " << Exam_yyyy << "-" << Exam_mm << "-" << Exam_dd << std::endl;

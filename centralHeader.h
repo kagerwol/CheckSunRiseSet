@@ -18,6 +18,8 @@
 #include <tchar.h>      // For Unicode and ASCII text mapping
 #include <sstream>      // For string stream operations
 #include <cstdio>       // For C-style I/O functions
+#include <functional>   // For function objects and lambda expressions
+#include <algorithm>    // For algorithms like sort, find, etc.
 
 // Platform-specific includes
 #ifdef _WIN32

@@ -7,6 +7,8 @@ MsConversion::MsConversion(
 	ConversionType theType)
 	: unixEpochUTCms(__unixEpochUTCms)
 	, isExtreme(0)
+	, delta2Ref(0)
+	, deltaRefSign(0)
 {
 	theMsSecondPart = unixEpochUTCms % 1000;
 	if (theType == TIMESTAMP)
@@ -40,18 +42,22 @@ MsConversion::MsConversion(
 		theTarget.tm_sec = static_cast<int>((secondsAfterMidnight % 3600) % 60);
 	}
 
+
+
 	return;     // to sender
 }
 
 
 // Copy constructor
 MsConversion::MsConversion(const MsConversion& other)
-	: unixEpochUTCms(other.unixEpochUTCms),
-	theMsSecondPart(other.theMsSecondPart),
-	theMsAfterMidnight(other.theMsAfterMidnight),
-	secondsAfterMidnight(other.secondsAfterMidnight),
-	theTarget(other.theTarget),
-	isExtreme(other.isExtreme)
+	: unixEpochUTCms(other.unixEpochUTCms)
+	, theMsSecondPart(other.theMsSecondPart)
+	, theMsAfterMidnight(other.theMsAfterMidnight)
+	, secondsAfterMidnight(other.secondsAfterMidnight)
+	, theTarget(other.theTarget)
+	, isExtreme(other.isExtreme)
+	, delta2Ref(other.delta2Ref)
+	, deltaRefSign(other.deltaRefSign)
 {
 }
 
@@ -66,6 +72,8 @@ MsConversion& MsConversion::operator=(const MsConversion& other)
 		secondsAfterMidnight = other.secondsAfterMidnight;
 		theTarget = other.theTarget;
 		isExtreme = other.isExtreme;
+		delta2Ref = other.delta2Ref;
+		deltaRefSign = other.deltaRefSign;
 	}
 	return *this;
 }
@@ -73,4 +81,27 @@ MsConversion& MsConversion::operator=(const MsConversion& other)
 MsConversion::~MsConversion()
 {
 	return;     // to sender
+}
+
+
+unsigned long long MsConversion::calcDelta2Ref(unsigned long long otherTime)
+{
+	// TODO: Add your implementation code here.
+	if (otherTime > theMsAfterMidnight)
+	{
+		delta2Ref = otherTime - theMsAfterMidnight;
+		deltaRefSign = +1;  // Reference is bigger
+	}
+	else if (otherTime < theMsAfterMidnight)
+	{
+		delta2Ref = theMsAfterMidnight - otherTime;
+		deltaRefSign = -1;  // Reference is smaller
+	}
+	else
+	{
+		delta2Ref = deltaRefSign = 0;
+	}
+
+	return delta2Ref;
+	return 0;
 }
