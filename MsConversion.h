@@ -17,10 +17,11 @@ protected:
 	struct tm theTarget;					   // This is the time structure of the local time zone in case of TIMESTAMP (Year, Month, Day, Hour, Minute, Second) or the duration in case of DURATION but only in Hours, Minutes and Seconds
 	int isExtreme;                             // -1 if this is somewhat earliest or shortest in environment, +1 if this is somewhat latest or longest in environment
 public:
-	MsConversion(unsigned long long _unixEpochUTCms, ConversionType theType);
-	MsConversion(const MsConversion& other);
-	MsConversion& operator=(const MsConversion& other);
-	virtual ~MsConversion();
+	MsConversion(unsigned long long _unixEpochUTCms, ConversionType theType); // Usual constructor
+	MsConversion(const MsConversion& other);   // Copy constructor
+	MsConversion& operator=(const MsConversion& other);   // Assign operator
+	virtual ~MsConversion();                   // Destructor
+	unsigned long long calcDelta2Ref(unsigned long long otherTime); // Calculate Delta Time to a reference time
 
 	// Accessors
 	inline const unsigned long long& get_unixEpochUTCms() const { return unixEpochUTCms; };
@@ -33,6 +34,4 @@ public:
 	inline const int& getExtreme() const { return isExtreme; };
 	inline int& setExtreme(int _extreme) { isExtreme = _extreme; return isExtreme; };
 	inline const unsigned long long& getDeltaRef() const { return delta2Ref; };
-
-	unsigned long long calcDelta2Ref(unsigned long long otherTime);
 };
