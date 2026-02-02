@@ -49,7 +49,7 @@ SunRiseSetData& SunRiseSetData::operator=(const SunRiseSetData& other)
 
 SunRiseSetData::~SunRiseSetData()
 {
-    return;     // to sender
+    return;                                     // to sender
 }
 
 
@@ -86,28 +86,28 @@ SunRiseSetDatas::~SunRiseSetDatas()
 }
 
 size_t SunRiseSetDatas::addDayData(
-    unsigned int ExamYear,                      // This is the Year to become examimed
-    unsigned int ExamMonth,                     // dito month
-    unsigned int ExamDay,						// dito day 
-    unsigned int ActYear,                       // This is the Year of the actual day to be treated
-    unsigned int ActMonth,  			        // dito month
-    unsigned int ActDay,    		            // dito day
-    unsigned long long sunrise_unix_ms,         // This is the Sunrise in ms after 1970-01-01 00:00:00
-    unsigned long long sunset_unix_ms,          // This is the Sunset in ms after 1970-01-01 00:00:00
-    unsigned long long day_length_ms            // This is the length of the day in ms
+	unsigned int ExamYear,                      // This is the Year to become examimed
+	unsigned int ExamMonth,                     // dito month
+	unsigned int ExamDay,						// dito day 
+	unsigned int ActYear,                       // This is the Year of the actual day to be treated
+	unsigned int ActMonth,  			        // dito month
+	unsigned int ActDay,    		            // dito day
+	unsigned long long sunrise_unix_ms,         // This is the Sunrise in ms after 1970-01-01 00:00:00
+	unsigned long long sunset_unix_ms,          // This is the Sunset in ms after 1970-01-01 00:00:00
+	unsigned long long day_length_ms            // This is the length of the day in ms
 )
 {
-    // Fill one tupel of the vector of sunRiseSetDatas
-    SunRiseSetData dayData(ActYear, ActMonth, ActDay, sunrise_unix_ms, sunset_unix_ms, day_length_ms);
-    // Add the tupel to the vector of sunRiseSetDatas
-    m_SunRiseSetDatas.push_back(dayData);
-    // If the Date of the Day to be examined is found in the vector of sunRiseSetDatas, we have to remember the index
-    if ((ActYear == ExamYear) && (ActMonth == ExamMonth) && (ActDay == ExamDay) && (!m_TheEvalIndex.valid))
-    {
-        m_TheEvalIndex.index = m_SunRiseSetDatas.size() - 1;
-        m_TheEvalIndex.valid = true;
-    }
-    return m_SunRiseSetDatas.size();
+	// Fill one tupel of the vector of sunRiseSetDatas
+	SunRiseSetData dayData(ActYear, ActMonth, ActDay, sunrise_unix_ms, sunset_unix_ms, day_length_ms);
+	// Add the tupel to the vector of sunRiseSetDatas
+	m_SunRiseSetDatas.push_back(dayData);
+	// If the Date of the Day to be examined is found in the vector of sunRiseSetDatas, we have to remember the index
+	if ((ActYear == ExamYear) && (ActMonth == ExamMonth) && (ActDay == ExamDay) && (!m_TheEvalIndex.valid))
+	{
+		m_TheEvalIndex.index = m_SunRiseSetDatas.size() - 1;
+		m_TheEvalIndex.valid = true;
+	}
+	return m_SunRiseSetDatas.size();
 }
 
 int SunRiseSetDatas::CheckForExtrema(const size_t anEvalIndex)
