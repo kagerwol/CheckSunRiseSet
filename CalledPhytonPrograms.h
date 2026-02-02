@@ -18,6 +18,7 @@ observer = ephem.Observer()
 observer.lat, observer.lon = '49.59749459760013',  '11.030420778017055' # Latitude and longitude of Erlangen LHS7
 #observer.lat, observer.lon = '49.6', '11.02' # Another Erlangen
 #observer.lat, observer.lon = '60.99245734329251', '24.447981540937395' # Hämmeenlinna
+#observer.lat, observer.lon = '41.14699766775208', '123.02513400392203' #Anshan China
 
 # Define timezone
 local_tz = pytz.timezone('UTC')
