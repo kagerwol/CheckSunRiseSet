@@ -14,3 +14,5 @@ bool isValidDate
     int& mm,
     int& dd
 );
+
+const std::string& getTimeZoneString();
