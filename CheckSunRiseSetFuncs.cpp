@@ -109,3 +109,12 @@ bool isValidDate
 
     return true;
 }
+
+// static std::string theTimeZone = "Europe/Berlin";
+static std::string theTimeZone = "Asia/Shanghai";
+
+const std::string &getTimeZoneString() 
+{
+
+  return theTimeZone;
+}
