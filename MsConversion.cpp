@@ -4,7 +4,8 @@
 // Constructor for MsConversion
 MsConversion::MsConversion(
     unsigned long long __unixEpochUTCms,
-    ConversionType theType)
+    ConversionType theType,
+    char _theSign)
     : unixEpochUTCms(__unixEpochUTCms)
     , isExtreme(0)
     , delta2Ref(0)

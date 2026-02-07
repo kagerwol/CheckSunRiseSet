@@ -6,20 +6,23 @@ class SunRiseSetData
 {
 public:
 	typedef enum {
-		RISE = 0,
-		SET = 1,
-		DUR = 2,
+		RISE = 0,									  // Evaluation of the Sunrise
+		SET  = 1,						      	// Evaluation of the Sunset		
+		DUR  = 2,                   // Evaluation of the Daylight
+    DELTA = 3,                  // Evaluation of the Delta to the previous day
 		NOCRITERIA
 	} TimeCriteria;
 
-
 protected:
-	unsigned int m_Year;
-	unsigned int m_Month;
-	unsigned int m_Day;
-	MsConversion m_Sunrise;
-	MsConversion m_Sunset;
-	MsConversion m_Daylength;
+  unsigned int m_Year;					       // The Year of the day to be examined
+  unsigned int m_Month;					       // The Month of the day to be examined
+  unsigned int m_Day;                  // The Day of the day to be examined
+  MsConversion m_Sunrise;				       // The Sunrise of the day to be examined
+  MsConversion m_Sunset;			       	 // The Sunset of the day to be examined
+  MsConversion m_Daylength;            // The Daylight Time of the day to be examined
+	MsConversion m_DeltaRise;            // The Delta Time of the sunrise to the previous day [ms]
+	MsConversion m_DeltaSet;	           // The Delta Time of the sunset to the previous day [ms]
+	MsConversion m_DeltaDur;             // The Delta Time of the daylight time to the previous day [ms]
 
 public:
 	inline const MsConversion& whatCriteria(TimeCriteria aType) const
@@ -30,6 +33,10 @@ public:
 			return m_Sunrise;
 		case SET:
 			return m_Sunset;
+		case DUR:
+			return m_Daylength;
+		case DELTA:
+			return m_DeltaRise; // or some appropriate member for DELTA
 		default:
 			return m_Daylength;
 		}
@@ -43,6 +50,10 @@ public:
 			return m_Sunrise;
 		case SET:
 			return m_Sunset;
+		case DUR:
+			return m_Daylength;
+		case DELTA:
+			return m_DeltaRise; // or some appropriate member for DELTA
 		default:
 			return m_Daylength;
 		}
@@ -83,6 +94,9 @@ public:
 
 	// Copy constructor
 	SunRiseSetData(const SunRiseSetData& other);
+
+	// Delta to previous
+	void calcDeltaPrev(const SunRiseSetData& other);
 
 	// Assignment operator
 	SunRiseSetData& operator=(const SunRiseSetData& other);

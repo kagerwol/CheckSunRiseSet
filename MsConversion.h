@@ -17,7 +17,7 @@ protected:
 	struct tm theTarget;					   // This is the time structure of the local time zone in case of TIMESTAMP (Year, Month, Day, Hour, Minute, Second) or the duration in case of DURATION but only in Hours, Minutes and Seconds
 	int isExtreme;                             // -1 if this is somewhat earliest or shortest in environment, +1 if this is somewhat latest or longest in environment
 public:
-	MsConversion(unsigned long long _unixEpochUTCms, ConversionType theType); // Usual constructor
+	MsConversion(unsigned long long _unixEpochUTCms, ConversionType theType, char _theSign = ' '); // Usual constructor
 	MsConversion(const MsConversion& other);   // Copy constructor
 	MsConversion& operator=(const MsConversion& other);   // Assign operator
 	virtual ~MsConversion();                   // Destructor

@@ -3,33 +3,52 @@
 #include "SunRiseSetData.h"
 
 SunRiseSetData::SunRiseSetData(
-    unsigned int _yyyy,
-    unsigned int _mm,
-    unsigned int _dd,
-    unsigned long long _sunrise_unix_ms,
-    unsigned long long _sunset_unix_ms,
-    unsigned long long _day_length_ms
+  unsigned int _yyyy,
+  unsigned int _mm,
+  unsigned int _dd,
+  unsigned long long _sunrise_unix_ms,
+  unsigned long long _sunset_unix_ms,
+  unsigned long long _day_length_ms
 )
-    : m_Year(_yyyy)
-    , m_Month(_mm)
-    , m_Day(_dd)
-    , m_Sunrise(_sunrise_unix_ms, MsConversion::TIMESTAMP)
-    , m_Sunset(_sunset_unix_ms, MsConversion::TIMESTAMP)
-    , m_Daylength(_day_length_ms, MsConversion::DURATION)
+  : m_Year(_yyyy)
+  , m_Month(_mm)
+  , m_Day(_dd)
+  , m_Sunrise(_sunrise_unix_ms, MsConversion::TIMESTAMP)
+  , m_Sunset(_sunset_unix_ms, MsConversion::TIMESTAMP)
+  , m_Daylength(_day_length_ms, MsConversion::DURATION)
+  , m_DeltaRise(0LL, MsConversion::DURATION)
+  , m_DeltaSet(0LL, MsConversion::DURATION)
+  , m_DeltaDur(0LL, MsConversion::DURATION)
 {
     return;     // to sender
 }
 
 // Copy constructor
 SunRiseSetData::SunRiseSetData(const SunRiseSetData& other)
-    : m_Year(other.m_Year)
-    , m_Month(other.m_Month)
-    , m_Day(other.m_Day)
-    , m_Sunrise(other.m_Sunrise)
-    , m_Sunset(other.m_Sunset)
-    , m_Daylength(other.m_Daylength)
+: m_Year(other.m_Year)
+, m_Month(other.m_Month)
+, m_Day(other.m_Day)
+, m_Sunrise(other.m_Sunrise)
+, m_Sunset(other.m_Sunset)
+, m_Daylength(other.m_Daylength)
+, m_DeltaRise(other.m_DeltaRise)
+, m_DeltaSet(other.m_DeltaSet)
+, m_DeltaDur(other.m_DeltaDur)
 {
     return;     // to sender
+}
+
+// Calculate Delta Time to the previous Day
+void SunRiseSetData::calcDeltaPrev(const SunRiseSetData& other)
+{
+  m_DeltaRise = m_Sunrise;
+  m_DeltaRise.calcDelta2Ref(other.m_Sunrise.getMsAfterMidnight());
+  m_DeltaSet = m_Sunset;
+  m_DeltaSet.calcDelta2Ref(other.m_Sunset.getMsAfterMidnight());
+  m_DeltaDur = m_Daylength;
+  m_DeltaDur.calcDelta2Ref(other.m_Daylength.getMsAfterMidnight());
+
+  return; 
 }
 
 // Assignment operator
@@ -43,6 +62,9 @@ SunRiseSetData& SunRiseSetData::operator=(const SunRiseSetData& other)
         m_Sunrise = other.m_Sunrise;
         m_Sunset = other.m_Sunset;
         m_Daylength = other.m_Daylength;
+        m_DeltaRise = other.m_DeltaRise;
+        m_DeltaSet = other.m_DeltaSet;
+        m_DeltaDur = other.m_DeltaDur;
     }
     return *this;
 }
@@ -88,10 +110,10 @@ SunRiseSetDatas::~SunRiseSetDatas()
 size_t SunRiseSetDatas::addDayData(
 	unsigned int ExamYear,                      // This is the Year to become examimed
 	unsigned int ExamMonth,                     // dito month
-	unsigned int ExamDay,						// dito day 
+	unsigned int ExamDay,						            // dito day 
 	unsigned int ActYear,                       // This is the Year of the actual day to be treated
-	unsigned int ActMonth,  			        // dito month
-	unsigned int ActDay,    		            // dito day
+	unsigned int ActMonth,  			              // dito month
+	unsigned int ActDay,    		                // dito day
 	unsigned long long sunrise_unix_ms,         // This is the Sunrise in ms after 1970-01-01 00:00:00
 	unsigned long long sunset_unix_ms,          // This is the Sunset in ms after 1970-01-01 00:00:00
 	unsigned long long day_length_ms            // This is the length of the day in ms
@@ -101,7 +123,12 @@ size_t SunRiseSetDatas::addDayData(
 	SunRiseSetData dayData(ActYear, ActMonth, ActDay, sunrise_unix_ms, sunset_unix_ms, day_length_ms);
 	// Add the tupel to the vector of sunRiseSetDatas
 	m_SunRiseSetDatas.push_back(dayData);
-	// If the Date of the Day to be examined is found in the vector of sunRiseSetDatas, we have to remember the index
+	
+  if (m_SunRiseSetDatas.size() > 1)
+  {
+    m_SunRiseSetDatas[m_SunRiseSetDatas.size() - 1].calcDeltaPrev(m_SunRiseSetDatas[m_SunRiseSetDatas.size() - 2]);
+  }
+  // If the Date of the Day to be examined is found in the vector of sunRiseSetDatas, we have to remember the index
 	if ((ActYear == ExamYear) && (ActMonth == ExamMonth) && (ActDay == ExamDay) && (!m_TheEvalIndex.valid))
 	{
 		m_TheEvalIndex.index = m_SunRiseSetDatas.size() - 1;
@@ -159,8 +186,6 @@ int SunRiseSetDatas::CheckForExtrema(const size_t anEvalIndex)
             break;
         }
     }
-
-
     return retVal;
 }
 
@@ -544,6 +569,3 @@ size_t SunRiseSetDatas::CalcDelta2Reference()
     }
     return sumIx;
 }
-
-
-
