@@ -4,8 +4,7 @@
 // Constructor for MsConversion
 MsConversion::MsConversion(
     unsigned long long __unixEpochUTCms,
-    ConversionType theType,
-    char _theSign)
+    ConversionType theType)
     : unixEpochUTCms(__unixEpochUTCms)
     , isExtreme(0)
     , delta2Ref(0)
@@ -54,6 +53,7 @@ MsConversion::MsConversion(const MsConversion& other)
     , theMsAfterMidnight(other.theMsAfterMidnight)
     , secondsAfterMidnight(other.secondsAfterMidnight)
     , theTarget(other.theTarget)
+    , theDelta2Ref(other.theDelta2Ref)
     , isExtreme(other.isExtreme)
     , delta2Ref(other.delta2Ref)
     , deltaRefSign(other.deltaRefSign)
@@ -70,6 +70,7 @@ MsConversion& MsConversion::operator=(const MsConversion& other)
         theMsAfterMidnight = other.theMsAfterMidnight;
         secondsAfterMidnight = other.secondsAfterMidnight;
         theTarget = other.theTarget;
+        theDelta2Ref = other.theDelta2Ref;
         isExtreme = other.isExtreme;
         delta2Ref = other.delta2Ref;
         deltaRefSign = other.deltaRefSign;
@@ -84,23 +85,31 @@ MsConversion::~MsConversion()
 }
 
 // Calculate the delta to the reference time
-unsigned long long MsConversion::calcDelta2Ref(unsigned long long otherTime)
+unsigned long long MsConversion::calcDelta2Ref(const  MsConversion& otherTime)
 {
-    if (otherTime > theMsAfterMidnight)
-    {
-        delta2Ref = otherTime - theMsAfterMidnight;
-        deltaRefSign = +1;  // Reference is bigger
-    }
-    else if (otherTime < theMsAfterMidnight)
-    {
-        delta2Ref = theMsAfterMidnight - otherTime;
-        deltaRefSign = -1;  // Reference is smaller
-    }
-    else
-    {
-        delta2Ref = deltaRefSign = 0;
-    }
+  unsigned long long secAfterMidnightA = 0ULL;
+  if (otherTime.getMsAfterMidnight() > theMsAfterMidnight)
+  {
+      delta2Ref = otherTime.getMsAfterMidnight() - theMsAfterMidnight;
+      secAfterMidnightA = otherTime.getSecondsAfterMidnight() - secondsAfterMidnight;
+      deltaRefSign = +1;  // Reference is bigger
+  }
+  else if (otherTime.getMsAfterMidnight() < theMsAfterMidnight)
+  {
+      delta2Ref = theMsAfterMidnight - otherTime.getMsAfterMidnight();
+      secAfterMidnightA = secondsAfterMidnight - otherTime.getSecondsAfterMidnight();
+      deltaRefSign = -1;  // Reference is smaller
+  }
+  else
+  {
+      delta2Ref = deltaRefSign = 0;
+  }
 
-    return delta2Ref;
+  memset(&theDelta2Ref, 0, sizeof(theDelta2Ref));
+  theDelta2Ref.tm_hour = static_cast<int>(secAfterMidnightA / 3600);
+  theDelta2Ref.tm_min = static_cast<int>((secAfterMidnightA % 3600) / 60);
+  theDelta2Ref.tm_sec = static_cast<int>(secAfterMidnightA % 60);
+
+  return delta2Ref;
 }
 

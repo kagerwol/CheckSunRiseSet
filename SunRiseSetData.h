@@ -9,7 +9,9 @@ public:
 		RISE = 0,									  // Evaluation of the Sunrise
 		SET  = 1,						      	// Evaluation of the Sunset		
 		DUR  = 2,                   // Evaluation of the Daylight
-    DELTA = 3,                  // Evaluation of the Delta to the previous day
+    DRISE = 3,                  // Evaluation of the Delta Sunrise to the previous day
+    DSET = 4,                   // Evaluation of the Delta Sunset to the previous day
+    DDUR = 5,                   // Evaluation of the Delta Daylight to the previous day
 		NOCRITERIA
 	} TimeCriteria;
 
@@ -35,8 +37,12 @@ public:
 			return m_Sunset;
 		case DUR:
 			return m_Daylength;
-		case DELTA:
+		case DRISE:
 			return m_DeltaRise; // or some appropriate member for DELTA
+    case DSET:
+      return m_DeltaSet; // or some appropriate member for DELTA
+    case DDUR:
+      return m_DeltaDur; // or some appropriate member for DELTA
 		default:
 			return m_Daylength;
 		}
@@ -52,8 +58,12 @@ public:
 			return m_Sunset;
 		case DUR:
 			return m_Daylength;
-		case DELTA:
+		case DRISE:
 			return m_DeltaRise; // or some appropriate member for DELTA
+		case DSET:
+			return m_DeltaSet; // or some appropriate member for DELTA
+		case DDUR:
+			return m_DeltaDur; // or some appropriate member for DELTA
 		default:
 			return m_Daylength;
 		}

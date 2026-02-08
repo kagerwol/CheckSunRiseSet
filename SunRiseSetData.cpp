@@ -42,11 +42,11 @@ SunRiseSetData::SunRiseSetData(const SunRiseSetData& other)
 void SunRiseSetData::calcDeltaPrev(const SunRiseSetData& other)
 {
   m_DeltaRise = m_Sunrise;
-  m_DeltaRise.calcDelta2Ref(other.m_Sunrise.getMsAfterMidnight());
+  m_DeltaRise.calcDelta2Ref(other.m_Sunrise);
   m_DeltaSet = m_Sunset;
-  m_DeltaSet.calcDelta2Ref(other.m_Sunset.getMsAfterMidnight());
+  m_DeltaSet.calcDelta2Ref(other.m_Sunset);
   m_DeltaDur = m_Daylength;
-  m_DeltaDur.calcDelta2Ref(other.m_Daylength.getMsAfterMidnight());
+  m_DeltaDur.calcDelta2Ref(other.m_Daylength);
 
   return; 
 }
@@ -345,7 +345,29 @@ std::ostringstream SunRiseSetDatas::printResult()                      // Create
             }
             else if (theInx == m_TheEvalIndex.index)
             {
-                sprintf_s(msgTxt, sizeof(msgTxt), "Actual:   ");
+              sprintf_s(msgTxt, sizeof(msgTxt), "Yesterday:");
+              sprintf_s(msgTxt, sizeof(msgTxt), "%s%04d-%02d-%02d",
+                msgTxt,
+                m_SunRiseSetDatas[theInx-1].getYear(),
+                m_SunRiseSetDatas[theInx-1].getMonth(),
+                m_SunRiseSetDatas[theInx-1].getDay());
+              sprintf_s(msgTxt, sizeof(msgTxt), "%s  %c%02d:%02d:%02d  %c%02d:%02d:%02d  %c%02d:%02d:%02d",
+                msgTxt,
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DRISE).getDSign(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DRISE).getDHour(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DRISE).getDMin(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DRISE).getDSec(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DSET).getDSign(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DSET).getDHour(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DSET).getDMin(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DSET).getDSec(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DDUR).getDSign(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DDUR).getDHour(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DDUR).getDMin(),
+                m_SunRiseSetDatas[theInx].whatCriteria(SunRiseSetData::DDUR).getDSec());
+              resultString << msgTxt << std::endl;
+
+              sprintf_s(msgTxt, sizeof(msgTxt), "Actual:   ");
             }
             else
             {
@@ -397,6 +419,30 @@ std::ostringstream SunRiseSetDatas::printResult()                      // Create
             if (foundOne)
             {
                 resultString << msgTxt << std::endl;
+            }
+            if (theInx == m_TheEvalIndex.index)
+            {
+              sprintf_s(msgTxt, sizeof(msgTxt), "Tomorrow: ");
+              sprintf_s(msgTxt, sizeof(msgTxt), "%s%04d-%02d-%02d",
+                msgTxt,
+                m_SunRiseSetDatas[theInx + 1].getYear(),
+                m_SunRiseSetDatas[theInx + 1].getMonth(),
+                m_SunRiseSetDatas[theInx + 1].getDay());
+              sprintf_s(msgTxt, sizeof(msgTxt), "%s  %c%02d:%02d:%02d  %c%02d:%02d:%02d  %c%02d:%02d:%02d",
+                msgTxt,
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DRISE).getDSign(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DRISE).getDHour(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DRISE).getDMin(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DRISE).getDSec(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DSET).getDSign(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DSET).getDHour(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DSET).getDMin(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DSET).getDSec(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DDUR).getDSign(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DDUR).getDHour(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DDUR).getDMin(),
+                m_SunRiseSetDatas[theInx + 1].whatCriteria(SunRiseSetData::DDUR).getDSec());
+              resultString << msgTxt << std::endl;
             }
         }
         ////                                 Actual    yyyy-mm-dd   hh:mm:ss   hh:mm:ss   hh:mm:ss
@@ -525,7 +571,7 @@ size_t SunRiseSetDatas::CalcDelta2Reference()
             m_RelevantIndices[criteria].clear();
             for (size_t anEvalInx = 0; anEvalInx < m_SunRiseSetDatas.size(); anEvalInx++)
             {
-                m_SunRiseSetDatas[anEvalInx].whatCriteriaNConst(criteria).calcDelta2Ref(m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(criteria).getMsAfterMidnight());
+                m_SunRiseSetDatas[anEvalInx].whatCriteriaNConst(criteria).calcDelta2Ref(m_SunRiseSetDatas[m_TheEvalIndex.index].whatCriteria(criteria));
                 sumIx++;
                 m_SortIndices[criteria].push_back(anEvalInx);
             }
