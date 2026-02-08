@@ -3,12 +3,17 @@
 
 // Constructor for MsConversion
 MsConversion::MsConversion(
-    unsigned long long __unixEpochUTCms,
-    ConversionType theType)
-    : unixEpochUTCms(__unixEpochUTCms)
-    , isExtreme(0)
-    , delta2Ref(0)
-    , deltaRefSign(0)
+  unsigned long long __unixEpochUTCms,
+  ConversionType theType)
+  : unixEpochUTCms(__unixEpochUTCms)
+  , delta2Ref(0)
+  , deltaRefSign(0)
+  , theMsAfterMidnight(0)
+  , secondsAfterMidnight(0)
+  , theMsSecondPart(0)
+  , theTarget({ 0 })
+  , theDelta2Ref({ 0 })
+  , isExtreme(0)
 {
     theMsSecondPart = unixEpochUTCms % 1000;
     if (theType == TIMESTAMP)
@@ -37,10 +42,13 @@ MsConversion::MsConversion(
         {
             secondsAfterMidnight++;
         }
+        time_t tempSeconds = secondsAfterMidnight;
         memset(&theTarget, 0, sizeof(theTarget));
-        theTarget.tm_hour = static_cast<int>(secondsAfterMidnight / 3600);
-        theTarget.tm_min = static_cast<int>((secondsAfterMidnight % 3600) / 60);
-        theTarget.tm_sec = static_cast<int>((secondsAfterMidnight % 3600) % 60);
+        theTarget.tm_sec = static_cast<int>(tempSeconds % 60);
+        tempSeconds /= 60;
+        theTarget.tm_min = static_cast<int>(tempSeconds % 60);
+        tempSeconds /= 60;
+        theTarget.tm_hour = static_cast<int>(tempSeconds);
     }
 
     return;     // to sender

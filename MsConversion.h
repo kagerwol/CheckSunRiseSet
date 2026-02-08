@@ -26,7 +26,7 @@ public:
 
 	// Accessors
 	inline const unsigned long long& get_unixEpochUTCms() const { return unixEpochUTCms; };
-	inline const unsigned long long& getSecondsAfterMidnight() const { return secondsAfterMidnight; };
+	inline unsigned long long getSecondsAfterMidnight() const { return secondsAfterMidnight; };
 	inline const unsigned long long& getMsAfterMidnight() const { return theMsAfterMidnight; };
 	inline const unsigned long long& getMs() const { return theMsSecondPart; };
   inline const char getDSign() const { return (deltaRefSign > 0) ? '-' : ((deltaRefSign < 0) ? '+' : ' '); };
