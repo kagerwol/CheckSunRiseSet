@@ -25,7 +25,8 @@
 // Platform-specific includes
 #ifdef _WIN32
 #include <windows.h>    // For Windows-specific functions
+inline void setConsoleUtf8() { SetConsoleOutputCP(CP_UTF8); }
 #else
 #include <unistd.h>     // For POSIX-specific functions
+inline void setConsoleUtf8() { /* No action needed on Unix-like systems; UTF-8 is default */ }
 #endif
-

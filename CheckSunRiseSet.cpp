@@ -17,7 +17,9 @@ int main(int argc, char* argv[], char* envp[])
     std::string dateArg;                        // String to store the date argument
     std::string tempFile("");                   // String to store the temporary file name
     int ret = 0;                                // Return code
-    std::deque<std::string> argList;           // Vector to store command-line arguments
+    std::deque<std::string> argList;            // Vector to store command-line arguments
+
+    setConsoleUtf8();                           // COnsole output in UTF-8, to be able to print the degree symbol
 
     double usedLatitude = 49.59749459760013;    // Variable to store user-provided latitude
     double usedLongitude = 11.030420778017055;  // Variable to store user-provided longitude
@@ -29,7 +31,7 @@ int main(int argc, char* argv[], char* envp[])
     allSunRiseLoations.push_back(SunRiseLocData(16.004253309523712, 47.582752519429604, "Sankt Corona am Wechsel", "SCW"));
     allSunRiseLoations.push_back(SunRiseLocData(11.030420778017055, 49.59749459760013, "Erlangen LHS7", "LHS7", true));
     allSunRiseLoations.push_back(SunRiseLocData(11.02, 49.6, "Erlangen", "ERL"));
-    allSunRiseLoations.push_back(SunRiseLocData(24.447981540937395, 60.99245734329251, "Hämmeenlinna", "HAM"));
+    allSunRiseLoations.push_back(SunRiseLocData(24.447981540937395, 60.99245734329251, "Hammeenlinna", "HAM"));
     allSunRiseLoations.push_back(SunRiseLocData(123.02513400392203, 41.14699766775208, "Anshan China", "ANSH"));
     allSunRiseLoations.push_back(SunRiseLocData(7.1739421, 51.47378,  "Bochum", "BO"));
     
@@ -190,8 +192,13 @@ int main(int argc, char* argv[], char* envp[])
             }
             else
             {
-                std::cerr << "Invalid date format (" << dateArg << "). Please use YYYY-MM-DD or YYYY.MM.DD, where YYYY is a valid Year, MM a valid Month and DD a valid Day" << std::endl;
-                throw std::runtime_error("");
+              std::cerr << "Invalid date format or invalid location (" << dateArg << "). Please use YYYY-MM-DD or YYYY.MM.DD, where YYYY is a valid Year, MM a valid Month and DD a valid Day, or use a known location name." << std::endl;
+              std::cerr << "Known location names are: " << std::endl;
+              for (const auto& loc : allSunRiseLoations)
+              {
+                std::cerr << "  " << loc.getLocationName() << " (" << loc.getShortName() << ")" << std::endl;
+              }
+              throw std::runtime_error("wrong arguments");
             }
             argList.pop_front();
         }
