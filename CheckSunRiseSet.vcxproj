@@ -130,6 +130,7 @@
     <ClCompile Include="CheckSunRiseSet.cpp" />
     <ClCompile Include="CheckSunRiseSetFuncs.cpp" />
     <ClCompile Include="MsConversion.cpp" />
+    <ClCompile Include="SunRiseLocData.cpp" />
     <ClCompile Include="SunRiseSetData.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +138,7 @@
     <ClInclude Include="centralHeader.h" />
     <ClInclude Include="CheckSunRiseSetFunc.h" />
     <ClInclude Include="MsConversion.h" />
+    <ClInclude Include="SunRiseLocData.h" />
     <ClInclude Include="SunRiseSetData.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

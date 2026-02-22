@@ -2,6 +2,7 @@
 //
 #include "centralHeader.h"
 #include "MsConversion.h"
+#include "SunRiseLocData.h"
 #include "SunRiseSetData.h"
 #include "CheckSunRiseSetFunc.h"
 #include "CalledPhytonPrograms.h"
@@ -12,11 +13,33 @@ int main(int argc, char* argv[], char* envp[])
     struct tm localTimeStr;                     // Structure to hold the local time
     char actDateStr[1024];                      // String to store the current date in YYYY-MM-DD format
     int yyyy, mm, dd;                           // Variables to store year, month, and day
-    int noArgs = argc - 1;                      // Number of command-line arguments
     int argx = 1;                               // Index for command-line arguments
     std::string dateArg;                        // String to store the date argument
     std::string tempFile("");                   // String to store the temporary file name
     int ret = 0;                                // Return code
+    std::deque<std::string> argList;           // Vector to store command-line arguments
+
+    double usedLatitude = 49.59749459760013;    // Variable to store user-provided latitude
+    double usedLongitude = 11.030420778017055;  // Variable to store user-provided longitude
+    std::string usedLocationName = "Erlangen LHS7";       // Variable to store the name of the location being used
+
+    std::vector<SunRiseLocData> allSunRiseLoations;  // Vector to store sunrise and sunset data for all examined days
+
+    allSunRiseLoations.push_back(SunRiseLocData(13.4050, 52.5200, "Berlin", "BER"));
+    allSunRiseLoations.push_back(SunRiseLocData(16.004253309523712, 47.582752519429604, "Sankt Corona am Wechsel", "SCW"));
+    allSunRiseLoations.push_back(SunRiseLocData(11.030420778017055, 49.59749459760013, "Erlangen LHS7", "LHS7", true));
+    allSunRiseLoations.push_back(SunRiseLocData(11.02, 49.6, "Erlangen", "ERL"));
+    allSunRiseLoations.push_back(SunRiseLocData(24.447981540937395, 60.99245734329251, "Hämmeenlinna", "HAM"));
+    allSunRiseLoations.push_back(SunRiseLocData(123.02513400392203, 41.14699766775208, "Anshan China", "ANSH"));
+    allSunRiseLoations.push_back(SunRiseLocData(7.1739421, 51.47378,  "Bochum", "BO"));
+    
+    const SunRiseLocData* locDefData = getDefaultLocation(allSunRiseLoations);
+    if (locDefData != nullptr)
+    {
+      usedLocationName = locDefData->getLocationName(); 
+      usedLatitude = locDefData->getLatitude();
+      usedLongitude = locDefData->getLongitude();
+    }
 
     try
     {
@@ -58,19 +81,39 @@ int main(int argc, char* argv[], char* envp[])
         sprintf_s(actDateStr, sizeof(actDateStr), "%04d-%02d-%02d", localTimeStr.tm_year + 1900, localTimeStr.tm_mon + 1, localTimeStr.tm_mday);
 
         // Determine the date argument to use
-        if (noArgs == 0)
+        if (argc == 1)
         {
-            noArgs = 1;
-            dateArg = actDateStr;
+            argList.push_back(actDateStr);
         }
         else
         {
-            dateArg = argv[1];
+          while (argc > 1)
+          {
+            argList.push_back(argv[argx++]);
+            argc--;
+          }
         }
 
         // Process each date argument
-        while (noArgs)
+        while (! argList.empty())
         {
+            dateArg = argList.front();
+            // Check if the Argument is an known Location in Short
+            const SunRiseLocData* locDataPtr = isKnownLocation(dateArg, allSunRiseLoations);
+            if (locDataPtr != nullptr)
+            {
+                //std::cout << "Found known location for " << locDataPtr->getLocationName()  << std::endl;
+                // danach entfernen
+                argList.pop_front();
+                if (argList.empty())
+                {
+                  argList.push_back(actDateStr);
+                }
+                usedLatitude = locDataPtr->getLatitude();
+                usedLongitude = locDataPtr->getLongitude(); 
+                usedLocationName = locDataPtr->getLocationName();
+                continue;
+            }
             // Check if the Argument is reside yyyy-mm-dd and is a valid date
             if (isValidDate(dateArg, yyyy, mm, dd))
             {
@@ -90,7 +133,7 @@ int main(int argc, char* argv[], char* envp[])
                 char textBuffer[MAX_PATH + 128];
 
 				        // Call the Python script to get the sunrise and sunset times
-                sprintf_s(textBuffer, sizeof(textBuffer), "py %s %d-%d-%d", tempFile.c_str(), yyyy, mm, dd);
+                sprintf_s(textBuffer, sizeof(textBuffer), "py %s %d-%d-%d  %.12f %.12f", tempFile.c_str(), yyyy, mm, dd, usedLatitude, usedLongitude);
 				        std::istringstream sres(cmdPipeExec(textBuffer));   // The output of the Python Program is a long String, which we have to split into lines
 				        std::string aSingleLine;							// Here we store the single line of the output  
 
@@ -129,6 +172,8 @@ int main(int argc, char* argv[], char* envp[])
                 {
                     sunRiseSetDatas.doAnalyzation();
                     sunRiseSetDatas.CalcDelta2Reference();
+                    sprintf_s(textBuffer, sizeof(textBuffer), "At location % s(% 7.3lf%c, % 7.3lf%c)", usedLocationName.c_str(), fabs(usedLatitude), (usedLatitude >= 0) ? 'N' : 'S', fabs(usedLongitude), (usedLongitude >= 0) ? 'E' : 'W');
+                    std::cout << textBuffer << std::endl << std::endl;
                     std::cout << sunRiseSetDatas.printResult().str();
 
 					//std::cout << "Found Index " << theEvalIndex << " for " << Exam_yyyy << "-" << Exam_mm << "-" << Exam_dd << std::endl;
@@ -148,11 +193,7 @@ int main(int argc, char* argv[], char* envp[])
                 std::cerr << "Invalid date format (" << dateArg << "). Please use YYYY-MM-DD or YYYY.MM.DD, where YYYY is a valid Year, MM a valid Month and DD a valid Day" << std::endl;
                 throw std::runtime_error("");
             }
-            noArgs--;
-            if (noArgs)
-            {
-                dateArg = argv[++argx];
-            }
+            argList.pop_front();
         }
     }
     catch (const std::exception& e)

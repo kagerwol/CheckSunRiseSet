@@ -10,8 +10,10 @@ import pandas as pd
 import pytz
 import sys
 import time
+import re
 
-# Set observer position (e.g., Erlangen)
+# Set default observer position (e.g., Erlangen)
+# These defaults are used if no latitude/longitude are passed as arguments.
 observer = ephem.Observer()
 #observer.lat, observer.lon = '52.5200', '13.4050'  # Latitude and longitude of Berlin
 #observer.lat, observer.lon = '47.582752519429604', '16.004253309523712' # Latitude and longitude of Sankt Corona am Wechsel
@@ -36,7 +38,7 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
     """
     data_unix = []   # Data for Unix timestamp output
 
-    for i in range(num_days): 
+    for i in range(num_days):
         current_date = start_date + timedelta(days=i)
         observer.date = current_date
 
@@ -67,32 +69,83 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
 
     return pd.DataFrame(data_unix)
 
+def _is_date_string(s: str) -> bool:
+    """Return True if s matches YYYY-MM-DD."""
+    return re.match(r'^\d{4}-\d{2}-\d{2}$', s) is not None
+
+def _is_float_like(s: str) -> bool:
+    """Return True if s can be interpreted as a float (latitude/longitude)."""
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 def main() -> None:
     """
     Main function of the script.
-    Processes input data, calculates sun times, and outputs the results.
+    Usage:
+      python script.py [YYYY-MM-DD] [latitude longitude]
+    - If a date is provided it must be YYYY-MM-DD.
+    - If latitude and longitude are provided they override the defaults.
+    Examples:
+      python script.py 2024-02-20
+      python script.py 2024-02-20 49.5974946 11.0304208
+      python script.py 49.5974946 11.0304208   # date omitted -> uses today
     """
-    # Process input date
-    if len(sys.argv) > 1:
-        try:
-            input_date = datetime.strptime(sys.argv[1], "%Y-%m-%d").date()
-        except ValueError:
-            print("Invalid date. Please use the format YYYY-MM-DD.")
-            return
-    else:
+    # Parse command-line arguments permissively:
+    args = sys.argv[1:]
+
+    input_date = None
+    lat_arg = None
+    lon_arg = None
+
+    # Extract date and numeric arguments from args in any reasonable order
+    for a in args:
+        if _is_date_string(a) and input_date is None:
+            try:
+                input_date = datetime.strptime(a, "%Y-%m-%d").date()
+            except ValueError:
+                # malformed date; ignore and continue
+                input_date = None
+        elif _is_float_like(a):
+            if lat_arg is None:
+                lat_arg = a
+            elif lon_arg is None:
+                lon_arg = a
+            else:
+                # ignore extra numeric args
+                pass
+        elif a.startswith("--lat=") and lat_arg is None:
+            lat_arg = a.split("=", 1)[1]
+        elif a.startswith("--lon=") and lon_arg is None:
+            lon_arg = a.split("=", 1)[1]
+        # other flags can be added here
+
+    if input_date is None:
         input_date = datetime.now().date()
 
-    # Calculate date range
+    # If both latitude and longitude provided, override the defaults
+    if (lat_arg is not None) and (lon_arg is not None):
+        # ephem expects strings for lat/lon; preserve sign/format
+        observer.lat = str(lat_arg)
+        observer.lon = str(lon_arg)
+    elif (lat_arg is not None) or (lon_arg is not None):
+        # partially provided coordinates are ambiguous; report and exit
+        print("If you supply coordinates, supply both latitude and longitude.")
+        return
+
+    # Calculate date range: one year back/forward
     start_date = input_date - timedelta(days=366)
     end_date = input_date + timedelta(days=366)
 
     # Calculate sun times
     dunix = calculate_sun_times(start_date, (end_date - start_date).days)
 
-    # Output input date
+    # Output input date (first line)
     print(input_date)
-    
-    # Output results directly to stdout
+
+    # Output results directly to stdout (one CSV-like line per day)
     for _, row in dunix.iterrows():
          print(f"{row['Date (unix)']}, {row['Sunrise (Unix ms)']}, {row['Sunset (Unix ms)']}, {row['Day Length (ms)']}")
 

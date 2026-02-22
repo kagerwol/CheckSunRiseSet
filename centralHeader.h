@@ -20,6 +20,7 @@
 #include <cstdio>       // For C-style I/O functions
 #include <functional>   // For function objects and lambda expressions
 #include <algorithm>    // For algorithms like sort, find, etc.
+#include <deque>        // For double-ended queue container
 
 // Platform-specific includes
 #ifdef _WIN32

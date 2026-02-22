@@ -27,6 +27,9 @@
     <ClCompile Include="SunRiseSetData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SunRiseLocData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CalledPhytonPrograms.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SunRiseSetData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SunRiseLocData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
