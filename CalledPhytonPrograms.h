@@ -94,6 +94,7 @@ def main() -> None:
       python script.py 49.5974946 11.0304208   # date omitted -> uses today
     """
     # Parse command-line arguments permissively:
+    # print("Arguments received:", sys.argv)
     args = sys.argv[1:]
 
     input_date = None
@@ -102,11 +103,14 @@ def main() -> None:
 
     # Extract date and numeric arguments from args in any reasonable order
     for a in args:
+        # print(f"Processing argument: {a}")
         if _is_date_string(a) and input_date is None:
             try:
                 input_date = datetime.strptime(a, "%Y-%m-%d").date()
+                #print(f"Parsed date: {input_date}")
             except ValueError:
                 # malformed date; ignore and continue
+                #print(f"Argument '{a}' looks like a date but is not valid. Ignoring.")
                 input_date = None
         elif _is_float_like(a):
             if lat_arg is None:
@@ -121,6 +125,7 @@ def main() -> None:
         elif a.startswith("--lon=") and lon_arg is None:
             lon_arg = a.split("=", 1)[1]
         # other flags can be added here
+        #print(f"Current parsed values: date={input_date}, lat={lat_arg}, lon={lon_arg}")
 
     if input_date is None:
         input_date = datetime.now().date()

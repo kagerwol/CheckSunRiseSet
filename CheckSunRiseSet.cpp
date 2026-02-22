@@ -133,7 +133,7 @@ int main(int argc, char* argv[], char* envp[])
                 char textBuffer[MAX_PATH + 128];
 
 				        // Call the Python script to get the sunrise and sunset times
-                sprintf_s(textBuffer, sizeof(textBuffer), "py %s %d-%d-%d  %.12f %.12f", tempFile.c_str(), yyyy, mm, dd, usedLatitude, usedLongitude);
+                sprintf_s(textBuffer, sizeof(textBuffer), "py %s %04d-%02d-%02d  %.12f %.12f", tempFile.c_str(), yyyy, mm, dd, usedLatitude, usedLongitude);
 				        std::istringstream sres(cmdPipeExec(textBuffer));   // The output of the Python Program is a long String, which we have to split into lines
 				        std::string aSingleLine;							// Here we store the single line of the output  
 
