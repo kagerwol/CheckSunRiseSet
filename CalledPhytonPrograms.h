@@ -42,25 +42,34 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         current_date = start_date + timedelta(days=i)
         observer.date = current_date
 
-        # Calculate sunrise and sunset in UTC and local time
         sunrise = observer.next_rising(ephem.Sun()).datetime()
         sunset = observer.next_setting(ephem.Sun()).datetime()
         sunrise_local = pytz.utc.localize(sunrise).astimezone(local_tz)
         sunset_local = pytz.utc.localize(sunset).astimezone(local_tz)
         sunrise_utc = pytz.utc.localize(sunrise).astimezone(timezone.utc)
         sunset_utc = pytz.utc.localize(sunset).astimezone(timezone.utc)
-        day_length = sunset_utc - sunrise_utc
 
-        # Convert to Unix timestamps
+        # Mark if sunrise is from previous day or sunset is from next day
+        sunrise_marker = " "
+        sunset_marker = " "
+        if sunrise_utc.date() < current_date:
+            sunrise_marker = "P"
+        if sunset_utc.date() > current_date:
+            sunset_marker = "N"
+
+        # Ensure sunset is after sunrise; if not, adjust sunset to next day
+        if sunset_utc < sunrise_utc:
+            sunset_utc += timedelta(days=1)
+
+        day_length = sunset_utc - sunrise_utc
         sunrise_unix_ms = round(sunrise_utc.timestamp() * 1000)
         sunset_unix_ms = round(sunset_utc.timestamp() * 1000)
         day_length_ms = round(day_length.total_seconds() * 1000)
 
-        # Append readable and Unix data
         data_unix.append({
             "Date (unix)": current_date,
-            "Sunrise (Unix ms)": sunrise_unix_ms,
-            "Sunset (Unix ms)": sunset_unix_ms,
+            "Sunrise (Unix ms)": f"{sunrise_unix_ms}{sunrise_marker}",
+            "Sunset (Unix ms)": f"{sunset_unix_ms}{sunset_marker}",
             "Day Length (ms)": day_length_ms,
             "Sunrise (local)": sunrise_local.time(),
             "Sunset (local)": sunset_local.time(),

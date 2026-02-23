@@ -131,10 +131,12 @@ int main(int argc, char* argv[], char* envp[])
                 SunRiseSetDatas sunRiseSetDatas;                // Here we store all the sunrise and sunset data for all the days what we got from our python programm
                 unsigned int Exam_yyyy = 0;                     // This is the Year to become examimed
                 unsigned int Exam_mm = 0;                       // dito month
-                unsigned int Exam_dd = 0;						// dito day 
+                unsigned int Exam_dd = 0;						            // dito day 
 				        unsigned int ActYear = 0;                       // This is the Year of the actual day to be treated
-				        unsigned int ActMonth = 0;  			        // dito month
-				        unsigned int ActDay = 0;    		            // dito day
+				        unsigned int ActMonth = 0;  			              // dito month
+				        unsigned int ActDay = 0;    		                // dito day
+                char sunrise_marker = ' ';                      // This is the marker for the sunrise time, it is ' ' if the sun rises on this day and 'p' if previous day sunrise time is used, because the sun does not rise on this day
+                char sunset_marker = ' ';                       // This is the marker for the sunset time, it is ' ' if the sun sets on this day and 'n' if next day sunset time is used, because the sun does not set on this day
 				        unsigned long long sunrise_unix_ms = 0;         // This is the Sunrise in ms after 1970-01-01 00:00:00
 				        unsigned long long sunset_unix_ms = 0;          // This is the Sunset in ms after 1970-01-01 00:00:00
 				        unsigned long long day_length_ms = 0;           // This is the length of the day in ms
@@ -163,15 +165,26 @@ int main(int argc, char* argv[], char* envp[])
                     }
 
 					          // All other Lines should contain the Data for the Day: The Date itself, the Sunrise, the Sunset and the Sunlight length
-					          noArg = sscanf_s(aSingleLine.c_str(), "%d-%d-%d, %llu, %llu, %llu", &ActYear, &ActMonth, &ActDay, &sunrise_unix_ms, &sunset_unix_ms, &day_length_ms);
-                    if (noArg != 6)
+					          noArg = sscanf_s(
+                        aSingleLine.c_str(),
+                        "%d-%d-%d, %llu%c, %llu%c, %llu",
+                        &ActYear,
+                        &ActMonth,
+                        &ActDay,
+                        &sunrise_unix_ms,
+                        &sunrise_marker, static_cast<unsigned int>(sizeof(sunrise_marker)),
+                        &sunset_unix_ms,
+                        &sunset_marker, static_cast<unsigned int>(sizeof(sunset_marker)),
+                        &day_length_ms
+                    );
+                    if (noArg != 8)
                     {
                         std::cerr << "Python Programm written back wrong response in line " << lineCnt << ": " << aSingleLine << std::endl;
                         throw std::runtime_error("");
                     }
 
 					          // Add the tupel to the vector of sunRiseSetDatas
-					          sunRiseSetDatas.addDayData(Exam_yyyy, Exam_mm, Exam_dd, ActYear, ActMonth, ActDay, sunrise_unix_ms, sunset_unix_ms, day_length_ms);
+					          sunRiseSetDatas.addDayData(Exam_yyyy, Exam_mm, Exam_dd, ActYear, ActMonth, ActDay, sunrise_unix_ms, sunrise_marker, sunset_unix_ms, sunset_marker, day_length_ms);
 
                     // Process each line here
                     // std::cout << "Processing line: " << aSingleLine << std::endl;

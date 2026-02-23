@@ -157,7 +157,9 @@ public:
 		unsigned int ActMonth,  			        // dito month
 		unsigned int ActDay,    		            // dito day
 		unsigned long long sunrise_unix_ms,         // This is the Sunrise in ms after 1970-01-01 00:00:00
+    char sunrise_marker,                        // This is the marker for the sunrise time, it is ' ' if the sun rises on this day and 'p' if previous day sunrise time is used, because the sun does not rise on this day
 		unsigned long long sunset_unix_ms,          // This is the Sunset in ms after 1970-01-01 00:00:00
+    char sunset_marker,                         // This is the marker for the sunset time, it is ' ' if the sun sets on this day and 'n' if next day sunset time is used, because the sun does not set on this day
 		unsigned long long day_length_ms            // This is the length of the day in ms
 	);
 
