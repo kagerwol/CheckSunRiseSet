@@ -25,17 +25,25 @@ int main(int argc, char* argv[], char* envp[])
     double usedLongitude = 11.030420778017055;  // Variable to store user-provided longitude
     std::string usedLocationName = "Erlangen LHS7";       // Variable to store the name of the location being used
 
-    std::vector<SunRiseLocData> allSunRiseLoations;  // Vector to store sunrise and sunset data for all examined days
+    std::vector<SunRiseLocData> allSunRiseLoc;  // Vector to store sunrise and sunset data for all examined days
 
-    allSunRiseLoations.push_back(SunRiseLocData(13.4050, 52.5200, "Berlin", "BER"));
-    allSunRiseLoations.push_back(SunRiseLocData(16.004253309523712, 47.582752519429604, "Sankt Corona am Wechsel", "SCW"));
-    allSunRiseLoations.push_back(SunRiseLocData(11.030420778017055, 49.59749459760013, "Erlangen LHS7", "LHS7", true));
-    allSunRiseLoations.push_back(SunRiseLocData(11.02, 49.6, "Erlangen", "ERL"));
-    allSunRiseLoations.push_back(SunRiseLocData(24.447981540937395, 60.99245734329251, "Hammeenlinna", "HAM"));
-    allSunRiseLoations.push_back(SunRiseLocData(123.02513400392203, 41.14699766775208, "Anshan China", "ANSH"));
-    allSunRiseLoations.push_back(SunRiseLocData(7.1739421, 51.47378,  "Bochum", "BO"));
-    
-    const SunRiseLocData* locDefData = getDefaultLocation(allSunRiseLoations);
+    allSunRiseLoc.push_back(SunRiseLocData(13.4050, 52.5200, "Berlin", "BER"));
+    allSunRiseLoc.push_back(SunRiseLocData(16.004253309523712, 47.582752519429604, "Sankt Corona am Wechsel", "SCW"));
+    allSunRiseLoc.push_back(SunRiseLocData(11.030420778017055, 49.59749459760013, "Erlangen LHS7", "LHS7", true));
+    allSunRiseLoc.push_back(SunRiseLocData(11.02, 49.6, "Erlangen", "ERL"));
+    allSunRiseLoc.push_back(SunRiseLocData(24.447981540937395, 60.99245734329251, "Hammeenlinna", "HAM"));
+    allSunRiseLoc.push_back(SunRiseLocData(123.02513400392203, 41.14699766775208, "Anshan China", "ANSH"));
+    allSunRiseLoc.push_back(SunRiseLocData(7.1739421, 51.47378,  "Bochum", "BO"));
+    allSunRiseLoc.push_back(SunRiseLocData(-8.546278183796636, 42.87701552131139, "Santiago de Compostela", "SNTC"));
+    allSunRiseLoc.push_back(SunRiseLocData(2.3522219, 48.856614, "Paris", "PAR"));
+    allSunRiseLoc.push_back(SunRiseLocData(15.077890747349263, 37.51680658399921, "Catania", "CAT"));
+    allSunRiseLoc.push_back(SunRiseLocData(22.565807164306058, 51.24074659813717, "Lublin", "LUB"));
+    allSunRiseLoc.push_back(SunRiseLocData(19.040235, 47.497912, "Budapest", "BUD"));
+    allSunRiseLoc.push_back(SunRiseLocData(10.752245, 59.913868, "Oslo", "OSL"));
+    allSunRiseLoc.push_back(SunRiseLocData(12.466538356911842, 41.94913784098775, "Rome", "ROM"));
+    allSunRiseLoc.push_back(SunRiseLocData(14.248124609834235, 40.83564085378236, "Naples", "NAP"));
+
+    const SunRiseLocData* locDefData = getDefaultLocation(allSunRiseLoc);
     if (locDefData != nullptr)
     {
       usedLocationName = locDefData->getLocationName(); 
@@ -101,7 +109,7 @@ int main(int argc, char* argv[], char* envp[])
         {
             dateArg = argList.front();
             // Check if the Argument is an known Location in Short
-            const SunRiseLocData* locDataPtr = isKnownLocation(dateArg, allSunRiseLoations);
+            const SunRiseLocData* locDataPtr = isKnownLocation(dateArg, allSunRiseLoc);
             if (locDataPtr != nullptr)
             {
                 //std::cout << "Found known location for " << locDataPtr->getLocationName()  << std::endl;
@@ -194,9 +202,9 @@ int main(int argc, char* argv[], char* envp[])
             {
               std::cerr << "Invalid date format or invalid location (" << dateArg << "). Please use YYYY-MM-DD or YYYY.MM.DD, where YYYY is a valid Year, MM a valid Month and DD a valid Day, or use a known location name." << std::endl;
               std::cerr << "Known location names are: " << std::endl;
-              for (const auto& loc : allSunRiseLoations)
+              for (const auto& loc : allSunRiseLoc)
               {
-                std::cerr << "  " << loc.getLocationName() << " (" << loc.getShortName() << ")" << std::endl;
+                std::cerr << "  " << loc.getLocationName() << " (" << loc.getShortName() << ")" << (loc.isDefault() ? " <-Default" : " ") << std::endl;
               }
               throw std::runtime_error("wrong arguments");
             }
