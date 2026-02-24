@@ -42,6 +42,21 @@ int main(int argc, char* argv[], char* envp[])
     allSunRiseLoc.push_back(SunRiseLocData(10.752245, 59.913868, "Oslo", "OSL"));
     allSunRiseLoc.push_back(SunRiseLocData(12.466538356911842, 41.94913784098775, "Rome", "ROM"));
     allSunRiseLoc.push_back(SunRiseLocData(14.248124609834235, 40.83564085378236, "Naples", "NAP"));
+    allSunRiseLoc.push_back(SunRiseLocData(-122.44101309663327, 37.76833367819105, "San Francisco", "SFO")); 
+    allSunRiseLoc.push_back(SunRiseLocData(-157.85759797082366, 21.309809310750566, "Honolulu", "HNL"));
+    allSunRiseLoc.push_back(SunRiseLocData(151.2081315508734, -33.85866717153931, "Sydney", "SYD"));
+    allSunRiseLoc.push_back(SunRiseLocData(121.46295693023379, 31.205872515867057, "Shanghai", "SHA"));
+    allSunRiseLoc.push_back(SunRiseLocData(174.7663930033069, -36.84552359972905, "Auckland", "AKL"));
+    allSunRiseLoc.push_back(SunRiseLocData(-70.9028751273797, -53.15898500469935, "Punta Arenas de Chile", "PACH"));
+    allSunRiseLoc.push_back(SunRiseLocData(18.406399051225634, -33.910038268565835, "Cape Town", "CAPT"));
+    allSunRiseLoc.push_back(SunRiseLocData(9.436705326084184, 0.40764796753931765, "LibreVille Gabun", "LIBV"));
+    allSunRiseLoc.push_back(SunRiseLocData(39.81697067583217, 21.43080874388954, "Mekka", "MEKK"));
+
+    // Sort available locations by longitude (ascending) so lists and lookups are ordered geographically
+    std::sort(allSunRiseLoc.begin(), allSunRiseLoc.end(),
+      [](const SunRiseLocData& a, const SunRiseLocData& b) {
+        return a.getLongitude() > b.getLongitude();
+      });
 
     const SunRiseLocData* locDefData = getDefaultLocation(allSunRiseLoc);
     if (locDefData != nullptr)
@@ -213,13 +228,64 @@ int main(int argc, char* argv[], char* envp[])
             }
             else
             {
-              std::cerr << "Invalid date format or invalid location (" << dateArg << "). Please use YYYY-MM-DD or YYYY.MM.DD, where YYYY is a valid Year, MM a valid Month and DD a valid Day, or use a known location name." << std::endl;
-              std::cerr << "Known location names are: " << std::endl;
+              char fmtstr[64];
+              char buf[512];
+          
+              // Provide a clear usage message and examples, then list known locations sorted by longitude.
+              std::cerr << "Invalid input: \"" << dateArg << "\"" << std::endl;
+              std::cerr << std::endl;
+              std::cerr << "Usage:" << std::endl;
+              std::cerr << "  " << argv[0] << " [LOCATION|DATE]..." << std::endl;
+              std::cerr << std::endl;
+              std::cerr << "Rules:" << std::endl;
+              std::cerr << "  - LOCATION   : known short name (e.g. LHS7) from the list below" << std::endl;
+              std::cerr << "  - DATE       : calendar date in format YYYY-MM-DD (YYYY.MM.DD also accepted)" << std::endl;
+              std::cerr << "  - Arguments can be repeated in any order." << std::endl;
+              std::cerr << "  - If only LOCATION is given, DATE defaults to today." << std::endl;
+              std::cerr << "  - If only DATE is given, LOCATION defaults to the configured default." << std::endl;
+              std::cerr << std::endl;
+              std::cerr << "Examples:" << std::endl;
+              std::cerr << "  " << argv[0] << " LHS7 2024-02-20     # location then date" << std::endl;
+              std::cerr << "  " << argv[0] << " 2024-02-20 LHS7     # date then location" << std::endl;
+              std::cerr << "  " << argv[0] << " LHS7               # date = today" << std::endl;
+              std::cerr << "  " << argv[0] << " 2024-02-20         # location = default" << std::endl;
+              std::cerr << std::endl;
+
+              std::cerr << "Known locations (sorted by longitude):" << std::endl;
+
+              size_t longLoc = strlen("Location");
+              size_t longShortLoc = strlen("Short");
               for (const auto& loc : allSunRiseLoc)
               {
-                std::cerr << "  " << loc.getLocationName() << " (" << loc.getShortName() << ")" << (loc.isDefault() ? " <-Default" : " ") << std::endl;
+                if (longLoc < strlen(loc.getLocationName().c_str()))
+                {
+                  longLoc = strlen(loc.getLocationName().c_str());
+                }
+                if (longShortLoc < strlen(loc.getShortName().c_str()))
+                {
+                  longShortLoc = strlen(loc.getShortName().c_str());
+                }
               }
-              throw std::runtime_error("wrong arguments");
+              sprintf_s(fmtstr, sizeof(fmtstr), "    Longitude    Latitude %%-%zds %%-%zds", longLoc, longShortLoc);
+              sprintf_s(buf, sizeof(buf), fmtstr, "Location", "Short");
+              std::cerr << buf << std::endl;
+
+              sprintf_s(fmtstr, sizeof(fmtstr), "  %%10.6f%%c %%10.6f%%c %%-%zds %%-%zds %%s", longLoc, longShortLoc);
+
+              for (const auto& loc : allSunRiseLoc)
+              {
+                // Print as:  <longitude> <latitude>, <Place>, <Short> [<-Default]
+                sprintf_s(buf, sizeof(buf), fmtstr,
+                  fabs(loc.getLongitude()),
+                  (loc.getLongitude() < 0.0 ? 'W' : 'E'),
+                  fabs(loc.getLatitude()),
+                  (loc.getLatitude() < 0.0 ? 'S' : 'N'),
+                  loc.getLocationName().c_str(),
+                  loc.getShortName().c_str(),
+                  loc.isDefault() ? " <-Default" : "");
+                std::cerr << buf << std::endl;
+              }
+              break;
             }
             argList.pop_front();
         }

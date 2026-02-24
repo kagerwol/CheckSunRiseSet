@@ -40,16 +40,33 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
 
     for i in range(num_days):
         current_date = start_date + timedelta(days=i)
+        # Use current_date as the calendar day we want results for.
+        # ephem expects a date/time; using the date is acceptable (treated as midnight UTC).
         observer.date = current_date
 
-        sunrise = observer.next_rising(ephem.Sun()).datetime()
-        sunset = observer.next_setting(ephem.Sun()).datetime()
-        sunrise_local = pytz.utc.localize(sunrise).astimezone(local_tz)
-        sunset_local = pytz.utc.localize(sunset).astimezone(local_tz)
-        sunrise_utc = pytz.utc.localize(sunrise).astimezone(timezone.utc)
-        sunset_utc = pytz.utc.localize(sunset).astimezone(timezone.utc)
+        # Get next rising/setting from observer.date.
+        # Wrap in try/except to handle polar day/night cases robustly.
+        try:
+            sunrise_dt = observer.next_rising(ephem.Sun()).datetime()
+            sunset_dt = observer.next_setting(ephem.Sun()).datetime()
+        except ephem.AlwaysUpError:
+            # Polar day: sun never sets -> full 24h daylight
+            sunrise_dt = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
+            sunset_dt = sunrise_dt + timedelta(days=1)   # treat as 24:00 (next day's 00:00)
+        except ephem.NeverUpError:
+            # Polar night: sun never rises -> 0h daylight
+            sunrise_dt = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
+            sunset_dt = sunrise_dt                        # same moment -> zero length
 
-        # Mark if sunrise is from previous day or sunset is from next day
+        # Treat ephem returned datetimes as naive UTC instants; localize to UTC for conversions
+        sunrise_utc = pytz.utc.localize(sunrise_dt).astimezone(timezone.utc)
+        sunset_utc = pytz.utc.localize(sunset_dt).astimezone(timezone.utc)
+
+        # For readable local times convert from UTC to local_tz
+        sunrise_local = sunrise_utc.astimezone(local_tz)
+        sunset_local = sunset_utc.astimezone(local_tz)
+
+        # Mark if sunrise is from previous day or sunset is from next day (relative to calendar day)
         sunrise_marker = " "
         sunset_marker = " "
         if sunrise_utc.date() < current_date:
@@ -57,11 +74,22 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         if sunset_utc.date() > current_date:
             sunset_marker = "N"
 
-        # Ensure sunset is after sunrise; if not, adjust sunset to next day
-        if sunset_utc < sunrise_utc:
-            sunset_utc += timedelta(days=1)
+        # Compute day length:
+        # - If sunset_utc >= sunrise_utc, normal interval
+        # - If sunset_utc < sunrise_utc, interpret as: daylight = midnight->sunset + sunrise->midnight_next_day
+        midnight = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0, tzinfo=timezone.utc)
+        next_midnight = midnight + timedelta(days=1)
 
-        day_length = sunset_utc - sunrise_utc
+        if sunset_utc >= sunrise_utc:
+            day_length = sunset_utc - sunrise_utc
+        else:
+            # Do not shift sunset_utc; compute split interval across midnight
+            # midnight and next_midnight are timezone-aware UTC datetimes; ensure sunrise_utc/sunset_utc are UTC-aware too
+            # (they are timezone-aware above)
+            day_part1 = max(timedelta(0), sunset_utc - midnight)         # midnight -> sunset
+            day_part2 = max(timedelta(0), next_midnight - sunrise_utc)   # sunrise -> next midnight
+            day_length = day_part1 + day_part2
+
         sunrise_unix_ms = round(sunrise_utc.timestamp() * 1000)
         sunset_unix_ms = round(sunset_utc.timestamp() * 1000)
         day_length_ms = round(day_length.total_seconds() * 1000)
