@@ -86,7 +86,7 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         # Compute day length:
         # - If sunset_utc >= sunrise_utc, normal interval
         # - If sunset_utc < sunrise_utc, interpret as: daylight = midnight->sunset + sunrise->midnight_next_day
-        midnight = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0, tzinfo=timezone.utc)
+        midnight = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0, tzinfo=local_tz)
         next_midnight = midnight + timedelta(days=1)
 
         if sunset_utc >= sunrise_utc:
