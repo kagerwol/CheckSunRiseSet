@@ -155,6 +155,7 @@ int main(int argc, char* argv[], char* envp[])
 				        unsigned long long sunrise_unix_ms = 0;         // This is the Sunrise in ms after 1970-01-01 00:00:00
 				        unsigned long long sunset_unix_ms = 0;          // This is the Sunset in ms after 1970-01-01 00:00:00
 				        unsigned long long day_length_ms = 0;           // This is the length of the day in ms
+                unsigned long long transit_unix_ms = 0;         // This is the Transit in ms after 1970-01-01 00:00:00
 				        size_t theEvalIndex = 0;                        // This is the index of the day to be examined in the vector of sunRiseSetDatas
 				        int noArg = 0;								    // This is the number of arguments read by sscanf_s, to check if the line is correct
                 char textBuffer[MAX_PATH + 128];
@@ -182,21 +183,29 @@ int main(int argc, char* argv[], char* envp[])
 					          // All other Lines should contain the Data for the Day: The Date itself, the Sunrise, the Sunset and the Sunlight length
 					          noArg = sscanf_s(
                         aSingleLine.c_str(),
-                        "%d-%d-%d, %llu%c, %llu%c, %llu",
+                        // "%d-%d-%d, %llu%c, %llu%c, %llu",
+                        "%d-%d-%d, %llu, %llu, %llu, %llu",
                         &ActYear,
                         &ActMonth,
                         &ActDay,
                         &sunrise_unix_ms,
-                        &sunrise_marker, static_cast<unsigned int>(sizeof(sunrise_marker)),
+                        // &sunrise_marker, static_cast<unsigned int>(sizeof(sunrise_marker)),
                         &sunset_unix_ms,
-                        &sunset_marker, static_cast<unsigned int>(sizeof(sunset_marker)),
-                        &day_length_ms
+                        // &sunset_marker, static_cast<unsigned int>(sizeof(sunset_marker)),
+                        &day_length_ms,
+                        &transit_unix_ms
                     );
-                    if (noArg != 8)
+                    if (noArg != 7)
                     {
                         std::cerr << "Python Programm written back wrong response in line " << lineCnt << ": " << aSingleLine << std::endl;
                         throw std::runtime_error("");
                     }
+
+                    time_t transitEpoch = static_cast<time_t>(transit_unix_ms / 1000);
+                    struct tm transitEpochTm;
+                    memset(&transitEpochTm, 0, sizeof(transitEpochTm));
+                    localtime_s(&transitEpochTm, &transitEpoch);
+
 
 					          // Add the tupel to the vector of sunRiseSetDatas
 					          sunRiseSetDatas.addDayData(Exam_yyyy, Exam_mm, Exam_dd, ActYear, ActMonth, ActDay, sunrise_unix_ms, sunrise_marker, sunset_unix_ms, sunset_marker, day_length_ms);

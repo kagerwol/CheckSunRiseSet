@@ -58,11 +58,11 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         try:
             sunrise_dt = observer.next_rising(ephem.Sun()).datetime()
             sunset_dt = observer.next_setting(ephem.Sun()).datetime()
+            transit_dt = observer.next_transit(ephem.Sun()).datetime()
         except ephem.AlwaysUpError:
             # Polar day: sun never sets -> full 24h daylight
             sunrise_dt = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
             sunset_dt = sunrise_dt + timedelta(days=1)   # treat as 24:00 (next day's 00:00)
-            transit_dt = observer.next_transit(ephem.Sun()).datetime()
             transit_dt = sunrise_dt + timedelta(hours=12)   # ebenfalls Ersatz
         except ephem.NeverUpError:
             # Polar night: sun never rises -> 0h daylight
@@ -76,16 +76,17 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         transit_utc = pytz.utc.localize(transit_dt).astimezone(timezone.utc)
 
         # For readable local times convert from UTC to unitc_tz
-        sunrise_local = sunrise_utc.astimezone(unitc_tz)
-        sunset_local = sunset_utc.astimezone(unitc_tz)
+        #sunrise_local = sunrise_utc.astimezone(unitc_tz)
+        #sunset_local = sunset_utc.astimezone(unitc_tz)
+        #transit_local = transit_utc.astimezone(unitc_tz)
 
         # Mark if sunrise is from previous day or sunset is from next day (relative to calendar day)
-        sunrise_marker = " "
-        sunset_marker = " "
-        if sunrise_utc.date() < current_date:
-            sunrise_marker = "P"
-        if sunset_utc.date() > current_date:
-            sunset_marker = "N"
+        #sunrise_marker = " "
+        #sunset_marker = " "
+        #if sunrise_utc.date() < current_date:
+        #    sunrise_marker = "P"
+        #if sunset_utc.date() > current_date:
+        #    sunset_marker = "N"
 
         # Compute day length:
         # - If sunset_utc >= sunrise_utc, normal interval
@@ -106,15 +107,17 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         sunrise_unix_ms = round(sunrise_utc.timestamp() * 1000)
         sunset_unix_ms = round(sunset_utc.timestamp() * 1000)
         day_length_ms = round(day_length.total_seconds() * 1000)
+        transit_unix_ms = round(transit_utc.timestamp() * 1000)
 
         data_unix.append({
             "Date (unix)": current_date,
-            "Sunrise (Unix ms)": f"{sunrise_unix_ms}{sunrise_marker}",
-            "Sunset (Unix ms)": f"{sunset_unix_ms}{sunset_marker}",
+            "Sunrise (Unix ms)": sunrise_unix_ms,
+            "Sunset (Unix ms)": sunset_unix_ms,
             "Day Length (ms)": day_length_ms,
-            "Sunrise (local)": sunrise_local.time(),
-            "Sunset (local)": sunset_local.time(),
-            "Day Length": str(day_length)
+            "Transit (Unix ms)": transit_unix_ms
+            # "Sunrise (local)": sunrise_local.time(),
+            # "Sunset (local)": sunset_local.time(),
+            # "Day Length": str(day_length)
         })
 
     return pd.DataFrame(data_unix)
@@ -202,7 +205,7 @@ def main() -> None:
 
     # Output results directly to stdout (one CSV-like line per day)
     for _, row in dunix.iterrows():
-         print(f"{row['Date (unix)']}, {row['Sunrise (Unix ms)']}, {row['Sunset (Unix ms)']}, {row['Day Length (ms)']}")
+         print(f"{row['Date (unix)']}, {row['Sunrise (Unix ms)']}, {row['Sunset (Unix ms)']}, {row['Day Length (ms)']}, {row['Transit (Unix ms)']} ")
 
 if __name__ == "__main__":
     main()
