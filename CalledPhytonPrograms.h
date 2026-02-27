@@ -23,7 +23,8 @@ observer.lat, observer.lon = '49.59749459760013',  '11.030420778017055' # Latitu
 #observer.lat, observer.lon = '41.14699766775208', '123.02513400392203' #Anshan China
 
 # Define timezone
-local_tz = pytz.timezone('UTC')
+local_tz = datetime.now().astimezone().tzinfo  # lokale PC-Zeitzone (Regeln inkl. DST)
+unitc_tz = pytz.timezone('UTC')
 
 def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
     """
@@ -40,9 +41,17 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
 
     for i in range(num_days):
         current_date = start_date + timedelta(days=i)
+        local_midnight = datetime(
+          current_date.year,
+          current_date.month,
+          current_date.day,
+          0, 0, 0,
+          tzinfo=local_tz
+        )
+        utc_midnight = local_midnight.astimezone(timezone.utc)
         # Use current_date as the calendar day we want results for.
         # ephem expects a date/time; using the date is acceptable (treated as midnight UTC).
-        observer.date = current_date
+        observer.date = utc_midnight
 
         # Get next rising/setting from observer.date.
         # Wrap in try/except to handle polar day/night cases robustly.
@@ -62,9 +71,9 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
         sunrise_utc = pytz.utc.localize(sunrise_dt).astimezone(timezone.utc)
         sunset_utc = pytz.utc.localize(sunset_dt).astimezone(timezone.utc)
 
-        # For readable local times convert from UTC to local_tz
-        sunrise_local = sunrise_utc.astimezone(local_tz)
-        sunset_local = sunset_utc.astimezone(local_tz)
+        # For readable local times convert from UTC to unitc_tz
+        sunrise_local = sunrise_utc.astimezone(unitc_tz)
+        sunset_local = sunset_utc.astimezone(unitc_tz)
 
         # Mark if sunrise is from previous day or sunset is from next day (relative to calendar day)
         sunrise_marker = " "
