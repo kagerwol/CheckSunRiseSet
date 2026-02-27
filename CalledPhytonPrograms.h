@@ -62,14 +62,18 @@ def calculate_sun_times(start_date: datetime, num_days: int) -> pd.DataFrame:
             # Polar day: sun never sets -> full 24h daylight
             sunrise_dt = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
             sunset_dt = sunrise_dt + timedelta(days=1)   # treat as 24:00 (next day's 00:00)
+            transit_dt = observer.next_transit(ephem.Sun()).datetime()
+            transit_dt = sunrise_dt + timedelta(hours=12)   # ebenfalls Ersatz
         except ephem.NeverUpError:
             # Polar night: sun never rises -> 0h daylight
             sunrise_dt = datetime(current_date.year, current_date.month, current_date.day, 0, 0, 0)
             sunset_dt = sunrise_dt                        # same moment -> zero length
+            transit_dt = sunrise_dt                       # ebenfalls Ersatz
 
         # Treat ephem returned datetimes as naive UTC instants; localize to UTC for conversions
         sunrise_utc = pytz.utc.localize(sunrise_dt).astimezone(timezone.utc)
         sunset_utc = pytz.utc.localize(sunset_dt).astimezone(timezone.utc)
+        transit_utc = pytz.utc.localize(transit_dt).astimezone(timezone.utc)
 
         # For readable local times convert from UTC to unitc_tz
         sunrise_local = sunrise_utc.astimezone(unitc_tz)
